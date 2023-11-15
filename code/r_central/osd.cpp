@@ -2077,17 +2077,21 @@ float render_osd_voltagesamps(float x, float y)
    }
    if ( s_bDebugOSDShowAll || (g_pCurrentModel->osd_params.osd_flags[g_iCurrentOSDVehicleLayout] & OSD_FLAG_SHOW_BATTERY ) )
    {
-      osd_show_amps(x,y, g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.current/1000.0, true);
-      if ( bMultiLine )
+      if (g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.current>0)
+         osd_show_amps(x,y, g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.current/1000.0, true);
+      if (g_pCurrentModel->m_Stats.uCurrentTotalCurrent>0)
       {
-         x = x0;
-         y += osd_getSecondBarHeight();
-         osd_show_mah(x,y, g_pCurrentModel->m_Stats.uCurrentTotalCurrent/10, true);
-      }
-      else
-      {
-         x -= 0.05*osd_getScaleOSD();
-         x -= osd_show_mah(x,y, g_pCurrentModel->m_Stats.uCurrentTotalCurrent/10, true);
+         if ( bMultiLine )
+         {
+            x = x0;
+            y += osd_getSecondBarHeight();
+            osd_show_mah(x,y, g_pCurrentModel->m_Stats.uCurrentTotalCurrent/10, true);
+         }
+         else
+         {
+            x -= 0.05*osd_getScaleOSD();
+            x -= osd_show_mah(x,y, g_pCurrentModel->m_Stats.uCurrentTotalCurrent/10, true);
+         }
       }
    }
    return x0 - x;
@@ -2600,13 +2604,19 @@ void osd_render_elements()
       x = 1.0 - osd_getSpacingH()-osd_getMarginX();
       y = 1.0 - osd_getMarginY() - osd_getBarHeight()-osd_getSecondBarHeight() + osd_getSpacingV();
       osd_show_voltage(x,y, g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.voltage/1000.0, true);
-   
-      x = 1.0 - osd_getSpacingH()-osd_getMarginX();
-      y += osd_getSecondBarHeight();
-      osd_show_amps(x,y, g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.current/1000.0, true);
 
-      x -= 0.074*osd_getScaleOSD();
-      osd_show_mah(x,y, g_pCurrentModel->m_Stats.uCurrentTotalCurrent/10, true);
+      y += osd_getSecondBarHeight();
+      if (g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.current>0)
+      {
+         x = 1.0 - osd_getSpacingH()-osd_getMarginX();
+         osd_show_amps(x,y, g_VehiclesRuntimeInfo[g_iCurrentOSDVehicleRuntimeInfoIndex].headerFCTelemetry.current/1000.0, true);
+      }
+
+      if (g_pCurrentModel->m_Stats.uCurrentTotalCurrent>0)
+      {
+         x -= 0.074*osd_getScaleOSD();
+         osd_show_mah(x,y, g_pCurrentModel->m_Stats.uCurrentTotalCurrent/10, true);
+      }
 
       g_pRenderEngine->enableFontScaling(false);
       return;
